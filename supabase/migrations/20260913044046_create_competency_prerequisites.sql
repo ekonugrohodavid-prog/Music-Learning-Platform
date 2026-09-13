@@ -1,0 +1,1 @@
+create table public.competency_prerequisites (competency_id uuid not null references public.competencies(id) on delete cascade, prerequisite_competency_id uuid not null references public.competencies(id) on delete cascade, primary key (competency_id, prerequisite_competency_id), check (competency_id <> prerequisite_competency_id));;

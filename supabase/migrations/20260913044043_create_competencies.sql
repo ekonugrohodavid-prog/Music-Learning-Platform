@@ -1,0 +1,1 @@
+create table public.competencies (id uuid primary key default gen_random_uuid(), code text not null unique, title text not null, description text, sequence integer not null check (sequence > 0), status text not null default 'active', created_at timestamptz not null default now(), updated_at timestamptz not null default now());;
