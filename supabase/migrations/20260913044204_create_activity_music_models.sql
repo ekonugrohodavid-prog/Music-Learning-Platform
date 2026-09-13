@@ -1,0 +1,1 @@
+create table public.activity_music_models (id uuid primary key default gen_random_uuid(), activity_id uuid not null references public.activities(id) on delete cascade, composition_id uuid not null references public.music_compositions(id) on delete cascade, model_type text not null, created_at timestamptz not null default now());;

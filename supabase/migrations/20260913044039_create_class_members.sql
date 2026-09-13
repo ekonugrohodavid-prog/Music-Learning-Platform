@@ -1,0 +1,1 @@
+create table public.class_members (id uuid primary key default gen_random_uuid(), class_id uuid not null references public.classes(id) on delete cascade, student_id uuid not null references public.profiles(id) on delete cascade, joined_at timestamptz not null default now(), status text not null default 'active', unique (class_id, student_id));;
