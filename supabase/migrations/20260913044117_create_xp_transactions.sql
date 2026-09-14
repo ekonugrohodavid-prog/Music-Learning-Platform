@@ -1,0 +1,1 @@
+create table public.xp_transactions (id uuid primary key default gen_random_uuid(), student_id uuid not null references public.profiles(id) on delete restrict, amount integer not null check (amount <> 0), source_type text not null, source_id uuid, description text, created_at timestamptz not null default now());;

@@ -1,0 +1,1 @@
+create table public.student_achievements (id uuid primary key default gen_random_uuid(), student_id uuid not null references public.profiles(id) on delete cascade, achievement_id uuid not null references public.achievements(id) on delete restrict, unlocked_at timestamptz not null default now(), evidence jsonb, unique (student_id, achievement_id));;
