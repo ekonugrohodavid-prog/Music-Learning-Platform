@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const protectedPrefixes = ["/student", "/teacher", "/admin"];
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request,
@@ -34,8 +36,21 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+
+  const pathname = request.nextUrl.pathname;
+  const isProtectedRoute = protectedPrefixes.some(
+    (prefix) =>
+      pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+
+  if (isProtectedRoute && !data?.claims) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
+
+    return NextResponse.redirect(loginUrl);
+  }
 
   return response;
 }
-
