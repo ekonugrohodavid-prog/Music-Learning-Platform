@@ -1,5 +1,5 @@
 import type { Repository, RepositoryId } from "./base";
-import type { CompetencyId } from "@/types";
+import type { CompetencyId, UserId } from "@/types";
 
 export type ProfileRepository<
   TProfile,
@@ -41,7 +41,17 @@ export type MasteryRepository<
   TCreateInput,
   TUpdateInput,
   TMasteryId extends RepositoryId = RepositoryId,
-> = Repository<TMastery, TCreateInput, TUpdateInput, TMasteryId>;
+> = Repository<
+  TMastery,
+  TCreateInput,
+  TUpdateInput,
+  TMasteryId
+> & {
+  findByStudentAndCompetency(
+    studentId: UserId,
+    competencyId: CompetencyId,
+  ): Promise<TMastery | null>;
+};
 
 export type XPRepository<
   TXPTransaction,
