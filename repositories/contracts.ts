@@ -13,7 +13,16 @@ export type ActivityRepository<
   TCreateInput,
   TUpdateInput,
   TActivityId extends RepositoryId = RepositoryId,
-> = Repository<TActivity, TCreateInput, TUpdateInput, TActivityId>;
+> = Repository<
+  TActivity,
+  TCreateInput,
+  TUpdateInput,
+  TActivityId
+> & {
+  listByCompetency(
+    competencyId: CompetencyId,
+  ): Promise<readonly TActivity[]>;
+};
 
 export type AttemptRepository<
   TAttempt,
@@ -77,7 +86,9 @@ export type CompetencyRepository<
   TCreateInput,
   TUpdateInput,
   TCompetencyId
->;
+> & {
+  findByCode(code: string): Promise<TCompetency | null>;
+};
 
 export interface LearningContentRepository<
   TEntity,
