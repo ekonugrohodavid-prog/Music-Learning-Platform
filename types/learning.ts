@@ -251,3 +251,10 @@ export interface MasteryRecord {
   createdAt: ISODateString;
   updatedAt: ISODateString;
 }
+
+export interface CompetencyDetail {
+  competency: Competency;
+  learningContents: readonly LearningContent[];
+  activities: readonly Activity[];
+  mastery: MasteryRecord | null;
+}
