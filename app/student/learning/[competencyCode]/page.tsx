@@ -53,10 +53,12 @@ export default async function StudentCompetencyPage({
         content !== null,
     )
     .map((content) => (
-      <li key={content.id}>
-        <h3>{content.title}</h3>
-        <p>{content.contentType}</p>
-      </li>
+<li key={content.id}>
+  <h3>{content.title}</h3>
+  <p>{content.contentType}</p>
+
+  {content.body && <p>{content.body}</p>}
+</li>
     ))}
 </ol>
         )}
