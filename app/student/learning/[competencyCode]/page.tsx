@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { createCompetencyDetailService } from "@/lib/learning/container";
+import { createLearningContentReaderService } from "@/lib/learning/content/container";
 
 interface StudentCompetencyPageProps {
   params: Promise<{
@@ -13,6 +14,8 @@ export default async function StudentCompetencyPage({
 }: StudentCompetencyPageProps) {
   const { competencyCode } = await params;
 
+  const contentReaderService = createLearningContentReaderService();
+
   const service = await createCompetencyDetailService();
   const detail = await service.getByCode(competencyCode);
 
@@ -21,6 +24,12 @@ export default async function StudentCompetencyPage({
   }
 
   const { competency, learningContents, activities, mastery } = detail;
+
+  const readableContents = await Promise.all(
+  learningContents.map((content) =>
+    contentReaderService.getById(content.id),
+  ),
+);
 
   return (
     <main>
@@ -38,13 +47,18 @@ export default async function StudentCompetencyPage({
           <p>No learning content available.</p>
         ) : (
           <ol>
-            {learningContents.map((content) => (
-              <li key={content.id}>
-                <h3>{content.title}</h3>
-                <p>{content.contentType}</p>
-              </li>
-            ))}
-          </ol>
+  {readableContents
+    .filter(
+      (content): content is NonNullable<typeof content> =>
+        content !== null,
+    )
+    .map((content) => (
+      <li key={content.id}>
+        <h3>{content.title}</h3>
+        <p>{content.contentType}</p>
+      </li>
+    ))}
+</ol>
         )}
       </section>
 
