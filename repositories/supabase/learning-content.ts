@@ -279,10 +279,12 @@ export class SupabaseLearningContentRepository
   async delete(id: string): Promise<void> {
     const supabase = await createClient();
 
-    const { error } = await supabase
-      .from("learning_contents")
-      .delete()
-      .eq("id", id);
+const { error } = await supabase
+  .from("learning_contents")
+  .select("*")
+  .eq("id", id)
+  .eq("status", "published")
+  .maybeSingle();
 
     if (error) {
       throw new PersistenceError(

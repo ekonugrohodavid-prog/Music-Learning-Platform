@@ -47,3 +47,10 @@ test("learning content repository uses PersistenceError", () => {
 test("learning content repository uses server Supabase client", () => {
   assert.match(source, /@\/lib\/supabase\/server/);
 });
+
+test("learning content repository filters findById to published content", () => {
+  assert.match(
+    source,
+    /\.eq\("id", id\)[\s\S]*\.eq\("status", "published"\)/,
+  );
+});
