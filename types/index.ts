@@ -25,6 +25,7 @@ export type {
   ContentStatus,
   LearningContent,
   LearningContentType,
+  MasteryRecord,
   PulseActivityConfiguration,
   TempoActivityConfiguration,
 } from "./learning";

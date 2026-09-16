@@ -239,3 +239,15 @@ export interface Competency {
   createdAt: ISODateString;
   updatedAt: ISODateString;
 }
+
+export interface MasteryRecord {
+  id: string;
+  studentId: UserId;
+  competencyId: CompetencyId;
+  masteryScore: number;
+  masteryLevel: number;
+  evidenceCount: number;
+  lastEvaluatedAt?: ISODateString;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+}
