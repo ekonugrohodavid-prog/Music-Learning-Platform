@@ -36,12 +36,19 @@ export default function LoginPage() {
           />
         </div>
 
-        <button
+               <button
           type="submit"
           className="w-full rounded bg-black px-4 py-2 text-white"
         >
           Login
         </button>
+
+        <a
+          href="/forgot-password"
+          className="block text-center text-sm text-gray-600 underline"
+        >
+          Lupa password?
+        </a>
       </form>
     </main>
   );

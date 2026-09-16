@@ -26,3 +26,22 @@ export async function refreshSession() {
 
   return supabase.auth.refreshSession();
 }
+
+export async function updatePassword(password: string) {
+  const supabase = await createClient();
+
+  return supabase.auth.updateUser({
+    password,
+  });
+}
+
+export async function sendPasswordRecovery(
+  email: string,
+  redirectTo: string,
+) {
+  const supabase = await createClient();
+
+  return supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+}

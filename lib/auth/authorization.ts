@@ -34,7 +34,9 @@ export async function resolveAuthContext(
     throw new AuthorizationError("User authorization is not valid.");
   }
 
-  const role = profile.roles?.[0]?.code;
+  const role = (
+    profile.roles as unknown as { code?: string } | null
+  )?.code;
 
   if (!role) {
     throw new AuthorizationError("User authorization is not valid.");
