@@ -7,10 +7,9 @@ const source = readFileSync(
   "utf8",
 );
 
-test("proxy protects student, teacher, and admin routes", () => {
-  assert.match(source, /"\/student"/);
-  assert.match(source, /"\/teacher"/);
-  assert.match(source, /"\/admin"/);
+test("proxy delegates protected route matching to route policy", () => {
+  assert.match(source, /getProtectedRoutePolicy/);
+  assert.match(source, /getProtectedRoutePolicy\(pathname\)/);
 });
 
 test("proxy checks authenticated claims", () => {

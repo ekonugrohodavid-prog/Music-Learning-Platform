@@ -162,3 +162,12 @@ test("musicCompositionSchema rejects invalid composition event", () => {
 
   assert.equal(result.success, false);
 });
+
+test("meterSchema rejects invalid beatUnit", () => {
+  const result = meterSchema.safeParse({
+    beatsPerMeasure: 4,
+    beatUnit: 0,
+  });
+
+  assert.equal(result.success, false);
+});
