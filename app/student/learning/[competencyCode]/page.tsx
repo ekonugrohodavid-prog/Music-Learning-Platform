@@ -57,7 +57,12 @@ export default async function StudentCompetencyPage({
 <h3>{content.title}</h3>
 <p>Type: {content.contentType}</p>
 
-{content.body && <p>{content.body}</p>}
+{content.body && (
+  <div>
+    <h4>Content</h4>
+    <p>{content.body}</p>
+  </div>
+)}
 </li>
     ))}
 </ol>
