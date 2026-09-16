@@ -50,3 +50,21 @@ test("activity repository preserves activity configuration type", () => {
     /configuration: Activity\["configuration"\]/,
   );
 });
+
+test("activity repository defines listByCompetency", () => {
+  assert.match(source, /listByCompetency\s*\(/);
+});
+
+test("activity repository filters activities by competency", () => {
+  assert.match(
+    source,
+    /\.eq\(["']competency_id["'],\s*competencyId\)/,
+  );
+});
+
+test("activity repository filters published activities by competency", () => {
+  assert.match(
+    source,
+    /\.eq\(["']status["'],\s*["']published["']\)/,
+  );
+});

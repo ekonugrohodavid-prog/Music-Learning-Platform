@@ -102,6 +102,49 @@ export class SupabaseActivityRepository
     return this.mapRow(data);
   }
 
+  async listByCompetency(
+  competencyId: string,
+): Promise<readonly Activity[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("activities")
+    .select(
+      `
+        id,
+        competency_id,
+        type,
+        title,
+        instructions,
+        difficulty,
+        configuration,
+        scoring_configuration,
+        status,
+        created_by,
+        published_by,
+        published_at,
+        created_at,
+        updated_at
+      `,
+    )
+    .eq("competency_id", competencyId)
+    .eq("status", "published")
+    .order("created_at", {
+      ascending: true,
+    });
+
+  if (error) {
+    throw new PersistenceError(
+      "Failed to list activities by competency.",
+      {
+        details: persistenceDetails(error),
+      },
+    );
+  }
+
+  return (data ?? []).map((row) => this.mapRow(row));
+}
+  
   async list(): Promise<readonly Activity[]> {
     const supabase = await createClient();
 

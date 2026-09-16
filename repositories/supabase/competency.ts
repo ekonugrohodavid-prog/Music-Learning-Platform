@@ -84,6 +84,43 @@ export class SupabaseCompetencyRepository
     return this.mapRow(data);
   }
 
+async findByCode(code: string): Promise<Competency | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("competencies")
+    .select(
+      `
+        id,
+        code,
+        title,
+        description,
+        sequence,
+        status,
+        created_at,
+        updated_at
+      `,
+    )
+    .eq("code", code)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (error) {
+    throw new PersistenceError(
+      "Failed to fetch competency by code.",
+      {
+        details: persistenceDetails(error),
+      },
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return this.mapRow(data);
+}
+
   async list(): Promise<readonly Competency[]> {
     const supabase = await createClient();
 
