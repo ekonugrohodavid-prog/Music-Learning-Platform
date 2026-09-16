@@ -1,4 +1,5 @@
 import type { Repository, RepositoryId } from "./base";
+import type { CompetencyId } from "@/types";
 
 export type ProfileRepository<
   TProfile,
@@ -67,3 +68,14 @@ export type CompetencyRepository<
   TUpdateInput,
   TCompetencyId
 >;
+
+export interface LearningContentRepository<
+  TEntity,
+  TCreateInput,
+  TUpdateInput,
+  TId extends RepositoryId = RepositoryId,
+> extends Repository<TEntity, TCreateInput, TUpdateInput, TId> {
+  listByCompetency(
+    competencyId: CompetencyId,
+  ): Promise<readonly TEntity[]>;
+}
