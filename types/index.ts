@@ -20,6 +20,8 @@ export type {
   Activity,
   ActivityStatus,
   ActivityType,
+  Competency,
+  CompetencyStatus,
   ContentStatus,
   LearningContent,
   LearningContentType,

@@ -224,3 +224,18 @@ export interface EvaluationResult {
   dimensions?: EvaluationDimension[];
   feedback?: string;
 }
+
+export type CompetencyStatus =
+  | "active"
+  | "inactive";
+
+export interface Competency {
+  id: CompetencyId;
+  code: string;
+  title: string;
+  description?: string;
+  sequence: number;
+  status: CompetencyStatus;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+}

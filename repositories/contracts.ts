@@ -55,3 +55,15 @@ export type AchievementRepository<
   TUpdateInput,
   TAchievementId extends RepositoryId = RepositoryId,
 > = Repository<TAchievement, TCreateInput, TUpdateInput, TAchievementId>;
+
+export type CompetencyRepository<
+  TCompetency,
+  TCreateInput,
+  TUpdateInput,
+  TCompetencyId extends RepositoryId = RepositoryId,
+> = Repository<
+  TCompetency,
+  TCreateInput,
+  TUpdateInput,
+  TCompetencyId
+>;
