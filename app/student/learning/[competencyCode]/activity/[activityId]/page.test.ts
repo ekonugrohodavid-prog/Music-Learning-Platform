@@ -35,6 +35,14 @@ test("activity detail page renders configuration", () => {
   assert.match(source, /activity\.configuration/);
 });
 
+test("activity detail page exposes start activity entry point", () => {
+  assert.match(source, /Start Activity/);
+});
+
+test("activity detail page keeps runtime entry point disabled before ACT-003", () => {
+  assert.match(source, /<button type="button" disabled>/);
+});
+
 test("activity detail page handles missing activity", () => {
   assert.match(source, /if \(!activity\)/);
 });

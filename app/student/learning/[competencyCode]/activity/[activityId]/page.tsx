@@ -41,6 +41,13 @@ export default async function ActivityDetailPage({
           {JSON.stringify(activity.configuration, null, 2)}
         </pre>
       </section>
+
+      <section>
+        <h2>Start</h2>
+        <button type="button" disabled>
+          Start Activity
+        </button>
+      </section>
     </main>
   );
 }
