@@ -1,4 +1,5 @@
 import { getActivity } from "@/app/actions/activities/get-activity";
+import { ActivityRuntimeClient } from "@/lib/activities/runtime/client";
 
 interface ActivityDetailPageProps {
   params: Promise<{
@@ -42,12 +43,9 @@ export default async function ActivityDetailPage({
         </pre>
       </section>
 
-      <section>
-        <h2>Start</h2>
-        <button type="button" disabled>
-          Start Activity
-        </button>
-      </section>
+      {activity.type === "pulse" && (
+        <ActivityRuntimeClient activity={activity} />
+      )}
     </main>
   );
 }
