@@ -24,8 +24,23 @@ export default async function ActivityDetailPage({
 
   return (
     <main>
-      <h1>{activity.title}</h1>
-      <p>{activity.instructions ?? "No instructions available."}</p>
+      <header>
+        <p>{activity.type}</p>
+        <h1>{activity.title}</h1>
+        <p>Difficulty: {activity.difficulty}</p>
+      </header>
+
+      <section>
+        <h2>Instructions</h2>
+        <p>{activity.instructions ?? "No instructions available."}</p>
+      </section>
+
+      <section>
+        <h2>Configuration</h2>
+        <pre>
+          {JSON.stringify(activity.configuration, null, 2)}
+        </pre>
+      </section>
     </main>
   );
 }

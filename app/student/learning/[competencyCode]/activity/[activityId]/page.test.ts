@@ -19,6 +19,22 @@ test("activity detail page renders activity title", () => {
   assert.match(source, /activity\.title/);
 });
 
+test("activity detail page renders activity type", () => {
+  assert.match(source, /activity\.type/);
+});
+
+test("activity detail page renders activity difficulty", () => {
+  assert.match(source, /activity\.difficulty/);
+});
+
+test("activity detail page renders instructions", () => {
+  assert.match(source, /activity\.instructions/);
+});
+
+test("activity detail page renders configuration", () => {
+  assert.match(source, /activity\.configuration/);
+});
+
 test("activity detail page handles missing activity", () => {
   assert.match(source, /if \(!activity\)/);
 });
