@@ -24,3 +24,24 @@ test("competency page conditionally renders learning content body", () => {
     /content\.body\s*&&/,
   );
 });
+
+test("competency page creates activity service", () => {
+  assert.match(
+    source,
+    /createActivityService/,
+  );
+});
+
+test("competency page loads activities through activity service", () => {
+  assert.match(
+    source,
+    /activityService\.listByCompetency\s*\(\s*competency\.id\s*\)/,
+  );
+});
+
+test("competency page renders readable activities", () => {
+  assert.match(
+    source,
+    /readableActivities\.map/,
+  );
+});

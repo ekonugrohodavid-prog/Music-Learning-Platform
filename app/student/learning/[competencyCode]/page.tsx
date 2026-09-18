@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { createCompetencyDetailService } from "@/lib/learning/container";
 import { createLearningContentReaderService } from "@/lib/learning/content/container";
+import { createActivityService } from "@/lib/activities/container";
 
 interface StudentCompetencyPageProps {
   params: Promise<{
@@ -15,6 +16,7 @@ export default async function StudentCompetencyPage({
   const { competencyCode } = await params;
 
   const contentReaderService = createLearningContentReaderService();
+  const activityService = createActivityService();
 
   const service = await createCompetencyDetailService();
   const detail = await service.getByCode(competencyCode);
@@ -23,7 +25,9 @@ export default async function StudentCompetencyPage({
     notFound();
   }
 
-  const { competency, learningContents, activities, mastery } = detail;
+  const { competency, learningContents, mastery } = detail;
+  const readableActivities =
+  await activityService.listByCompetency(competency.id);
 
   const readableContents = await Promise.all(
   learningContents.map((content) =>
@@ -72,11 +76,11 @@ export default async function StudentCompetencyPage({
       <section aria-labelledby="activity-heading">
         <h2 id="activity-heading">Activities</h2>
 
-        {activities.length === 0 ? (
+        {readableActivities.length === 0 ? (
           <p>No activities available.</p>
         ) : (
           <ol>
-            {activities.map((activity) => (
+            {readableActivities.map((activity) => (
               <li key={activity.id}>
                 <h3>{activity.title}</h3>
                 <p>{activity.type}</p>
