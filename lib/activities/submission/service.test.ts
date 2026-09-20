@@ -1,0 +1,249 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import type {
+  ActivityAttempt,
+  ActivityResponse,
+  AttemptState,
+} from "@/types";
+
+import type { ActivitySubmissionDependencies } from "./contracts";
+import { ActivitySubmissionService } from "./service.ts";
+
+const activity = {
+  id: "activity-1",
+  competencyId: "competency-1",
+  type: "pulse",
+  title: "Tap the Pulse",
+  difficulty: 1,
+  configuration: {
+  type: "pulse",
+  tempoBpm: 60,
+  beatCount: 4,
+},
+  status: "published",
+  createdBy: "teacher-1",
+  createdAt: "2026-09-01T00:00:00.000Z",
+  updatedAt: "2026-09-01T00:00:00.000Z",
+} as const;
+
+const response: ActivityResponse = {
+  type: "pulse",
+  response: "beat",
+};
+
+function createAttempt(
+  overrides: Partial<ActivityAttempt> = {},
+): ActivityAttempt {
+  return {
+    id: "attempt-1",
+    activityId: "activity-1",
+    studentId: "student-1",
+    startedAt: "2026-09-20T00:00:00.000Z",
+    response: undefined,
+    evaluation: undefined,
+    score: undefined,
+    completionState: "started",
+    attemptNumber: 1,
+    createdAt: "2026-09-20T00:00:00.000Z",
+    updatedAt: "2026-09-20T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function createDependencies(
+  overrides: Partial<ActivitySubmissionDependencies> = {},
+) {
+  const savedAttempts: Array<{
+    attemptId: string;
+    input: {
+      submittedAt: string;
+      response: ActivityResponse;
+      completionState: "submitted";
+    };
+  }> = [];
+
+  const dependencies: ActivitySubmissionDependencies = {
+    getActivity: async () => activity,
+    getAttempt: async () => createAttempt(),
+    saveAttempt: async (attemptId, input) => {
+      savedAttempts.push({ attemptId, input });
+
+      return createAttempt({
+        submittedAt: input.submittedAt,
+        response: input.response,
+        completionState: input.completionState,
+      });
+    },
+    ...overrides,
+  };
+
+  return { dependencies, savedAttempts };
+}
+
+test("rejects when activity does not exist", async () => {
+  const { dependencies } = createDependencies({
+    getActivity: async () => null,
+  });
+
+  const service = new ActivitySubmissionService(dependencies);
+
+  await assert.rejects(
+    () =>
+      service.submit({
+        activityId: "activity-1",
+        attemptId: "attempt-1",
+        studentId: "student-1",
+        response,
+      }),
+  );
+});
+
+test("rejects when attempt does not exist", async () => {
+  const { dependencies } = createDependencies({
+    getAttempt: async () => null,
+  });
+
+  const service = new ActivitySubmissionService(dependencies);
+
+  await assert.rejects(
+    () =>
+      service.submit({
+        activityId: "activity-1",
+        attemptId: "attempt-1",
+        studentId: "student-1",
+        response,
+      }),
+  );
+});
+
+test("rejects when attempt belongs to another student", async () => {
+  const { dependencies } = createDependencies({
+    getAttempt: async () =>
+      createAttempt({
+        studentId: "another-student",
+      }),
+  });
+
+  const service = new ActivitySubmissionService(dependencies);
+
+  await assert.rejects(
+    () =>
+      service.submit({
+        activityId: "activity-1",
+        attemptId: "attempt-1",
+        studentId: "student-1",
+        response,
+      }),
+  );
+});
+
+test("rejects when attempt belongs to another activity", async () => {
+  const { dependencies } = createDependencies({
+    getAttempt: async () =>
+      createAttempt({
+        activityId: "activity-2",
+      }),
+  });
+
+  const service = new ActivitySubmissionService(dependencies);
+
+  await assert.rejects(
+    () =>
+      service.submit({
+        activityId: "activity-1",
+        attemptId: "attempt-1",
+        studentId: "student-1",
+        response,
+      }),
+  );
+});
+
+test("rejects an attempt that is already submitted", async () => {
+  const { dependencies } = createDependencies({
+    getAttempt: async () =>
+      createAttempt({
+        completionState: "submitted" as AttemptState,
+      }),
+  });
+
+  const service = new ActivitySubmissionService(dependencies);
+
+  await assert.rejects(
+    () =>
+      service.submit({
+        activityId: "activity-1",
+        attemptId: "attempt-1",
+        studentId: "student-1",
+        response,
+      }),
+  );
+});
+
+test("submits a started attempt", async () => {
+  const { dependencies, savedAttempts } = createDependencies();
+
+  const service = new ActivitySubmissionService(dependencies);
+
+  const result = await service.submit({
+    activityId: "activity-1",
+    attemptId: "attempt-1",
+    studentId: "student-1",
+    response,
+  });
+
+  assert.equal(result.state, "submitted");
+  assert.equal(result.attempt.completionState, "submitted");
+  assert.equal(savedAttempts.length, 1);
+});
+
+test("creates submittedAt on the service side", async () => {
+  const { dependencies, savedAttempts } = createDependencies();
+
+  const service = new ActivitySubmissionService(dependencies);
+
+  await service.submit({
+    activityId: "activity-1",
+    attemptId: "attempt-1",
+    studentId: "student-1",
+    response,
+  });
+
+  assert.equal(savedAttempts.length, 1);
+  assert.match(
+    savedAttempts[0].input.submittedAt,
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+  );
+});
+
+test("passes the student response to the repository", async () => {
+  const { dependencies, savedAttempts } = createDependencies();
+
+  const service = new ActivitySubmissionService(dependencies);
+
+  await service.submit({
+    activityId: "activity-1",
+    attemptId: "attempt-1",
+    studentId: "student-1",
+    response,
+  });
+
+  assert.deepEqual(savedAttempts[0].input.response, response);
+});
+
+test("does not perform evaluation or scoring", async () => {
+  const { dependencies, savedAttempts } = createDependencies();
+
+  const service = new ActivitySubmissionService(dependencies);
+
+  const result = await service.submit({
+    activityId: "activity-1",
+    attemptId: "attempt-1",
+    studentId: "student-1",
+    response,
+  });
+
+  assert.equal(savedAttempts[0].input.completionState, "submitted");
+  assert.equal(result.attempt.evaluation, undefined);
+  assert.equal(result.attempt.score, undefined);
+});
