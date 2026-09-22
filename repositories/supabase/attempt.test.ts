@@ -24,6 +24,40 @@ test("attempt repository defines required repository operations", () => {
   assert.match(source, /delete\s*\(/);
 });
 
+test("attempt repository defines atomic submission operation", () => {
+  assert.match(
+    source,
+    /submitStartedAttempt\s*\(/,
+  );
+
+  assert.match(
+    source,
+    /\.eq\("completion_state",\s*"started"\)/,
+  );
+
+  assert.match(
+    source,
+    /completion_state:\s*"submitted"/,
+  );
+});
+
+test("attempt repository returns existing attempt when atomic submission does not update", () => {
+  assert.match(
+    source,
+    /if\s*\(data\)\s*\{[\s\S]*didSubmit:\s*true/,
+  );
+
+  assert.match(
+    source,
+    /findById\(attemptId\)/,
+  );
+
+  assert.match(
+    source,
+    /didSubmit:\s*false/,
+  );
+});
+
 test("attempt repository uses activity_attempts table", () => {
   assert.match(
     source,

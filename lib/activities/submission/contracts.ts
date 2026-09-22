@@ -26,14 +26,18 @@ export interface ActivitySubmissionDependencies {
     attemptId: string,
   ) => Promise<ActivityAttempt | null>;
 
-  readonly saveAttempt: (
-    attemptId: string,
-    input: {
-      submittedAt: string;
-      response: ActivityResponse;
-      completionState: "submitted";
-    },
-  ) => Promise<ActivityAttempt>;
+  readonly submitStartedAttempt: (
+  attemptId: string,
+  studentId: string,
+  activityId: string,
+  input: {
+    submittedAt: string;
+    response: ActivityResponse;
+  },
+) => Promise<{
+  attempt: ActivityAttempt;
+  didSubmit: boolean;
+}>;
 }
 
 export interface ActivitySubmissionService {

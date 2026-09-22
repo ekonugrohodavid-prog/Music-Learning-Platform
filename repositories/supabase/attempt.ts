@@ -269,6 +269,102 @@ export class SupabaseAttemptRepository
     return this.mapRow(data);
   }
 
+    async submitStartedAttempt(
+    attemptId: string,
+    studentId: string,
+    activityId: string,
+    input: {
+      submittedAt: string;
+      response: ActivityResponse;
+    },
+  ): Promise<{
+    attempt: ActivityAttempt;
+    didSubmit: boolean;
+  }> {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("activity_attempts")
+      .update({
+        submitted_at: input.submittedAt,
+        response: input.response,
+        completion_state: "submitted",
+      })
+      .eq("id", attemptId)
+      .eq("student_id", studentId)
+      .eq("activity_id", activityId)
+      .eq("completion_state", "started")
+      .select(
+        `
+          id,
+          activity_id,
+          student_id,
+          started_at,
+          submitted_at,
+          response,
+          evaluation,
+          score,
+          completion_state,
+          attempt_number,
+          created_at,
+          updated_at
+        `,
+      )
+      .maybeSingle();
+
+    if (error) {
+      throw new PersistenceError(
+        "Failed to submit activity attempt.",
+        {
+          details: persistenceDetails(error),
+        },
+      );
+    }
+
+    if (data) {
+      return {
+        attempt: this.mapRow(data),
+        didSubmit: true,
+      };
+    }
+
+    const existingAttempt = await this.findById(attemptId);
+
+    if (!existingAttempt) {
+      throw new PersistenceError(
+        "Activity attempt was not found after submission.",
+        {
+          details: {
+            attemptId,
+            studentId,
+            activityId,
+          },
+        },
+      );
+    }
+
+    if (
+      existingAttempt.studentId !== studentId ||
+      existingAttempt.activityId !== activityId
+    ) {
+      throw new PersistenceError(
+        "Activity attempt does not belong to the submission context.",
+        {
+          details: {
+            attemptId,
+            studentId,
+            activityId,
+          },
+        },
+      );
+    }
+
+    return {
+      attempt: existingAttempt,
+      didSubmit: false,
+    };
+  }
+
   async delete(id: string): Promise<void> {
     const supabase = await createClient();
 

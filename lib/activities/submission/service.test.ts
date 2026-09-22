@@ -55,28 +55,44 @@ function createDependencies(
   overrides: Partial<ActivitySubmissionDependencies> = {},
 ) {
   const savedAttempts: Array<{
-    attemptId: string;
-    input: {
-      submittedAt: string;
-      response: ActivityResponse;
-      completionState: "submitted";
-    };
-  }> = [];
+  attemptId: string;
+  input: {
+    submittedAt: string;
+    response: ActivityResponse;
+    completionState: "submitted";
+  };
+}> = [];
 
-  const dependencies: ActivitySubmissionDependencies = {
-    getActivity: async () => activity,
-    getAttempt: async () => createAttempt(),
-    saveAttempt: async (attemptId, input) => {
-      savedAttempts.push({ attemptId, input });
+const dependencies: ActivitySubmissionDependencies = {
+  getActivity: async () => activity,
+  getAttempt: async () => createAttempt(),
 
-      return createAttempt({
+  submitStartedAttempt: async (
+    attemptId,
+    _studentId,
+    _activityId,
+    input,
+  ) => {
+    savedAttempts.push({
+  attemptId,
+  input: {
+    ...input,
+    completionState: "submitted",
+  },
+});
+
+    return {
+      attempt: createAttempt({
         submittedAt: input.submittedAt,
         response: input.response,
-        completionState: input.completionState,
-      });
-    },
-    ...overrides,
-  };
+        completionState: "submitted",
+      }),
+      didSubmit: true,
+    };
+  },
+
+  ...overrides,
+};
 
   return { dependencies, savedAttempts };
 }
@@ -159,25 +175,112 @@ test("rejects when attempt belongs to another activity", async () => {
   );
 });
 
-test("rejects an attempt that is already submitted", async () => {
-  const { dependencies } = createDependencies({
-    getAttempt: async () =>
-      createAttempt({
-        completionState: "submitted" as AttemptState,
-      }),
+test("returns an already submitted attempt without saving again", async () => {
+  let saveAttemptCalls = 0;
+
+  const attempt: ActivityAttempt = {
+    id: "attempt-1",
+    activityId: "activity-1",
+    studentId: "student-1",
+    startedAt: "2026-01-01T00:00:00.000Z",
+    submittedAt: "2026-01-01T00:01:00.000Z",
+    response: {
+      type: "pulse",
+      response: "tap",
+    },
+    completionState: "submitted",
+    attemptNumber: 1,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:01:00.000Z",
+  };
+
+  const service = new ActivitySubmissionService({
+    getActivity: async () => activity,
+    getAttempt: async () => attempt,
+    submitStartedAttempt: async () => {
+  saveAttemptCalls += 1;
+
+  return {
+    attempt,
+    didSubmit: false,
+  };
+},
   });
 
-  const service = new ActivitySubmissionService(dependencies);
+  test("returns an evaluated attempt without saving again", async () => {
+  let saveAttemptCalls = 0;
 
-  await assert.rejects(
-    () =>
-      service.submit({
-        activityId: "activity-1",
-        attemptId: "attempt-1",
-        studentId: "student-1",
-        response,
-      }),
-  );
+  const attempt = createAttempt({
+    completionState: "evaluated",
+  });
+
+  const service = new ActivitySubmissionService({
+    getActivity: async () => activity,
+    getAttempt: async () => attempt,
+    submitStartedAttempt: async () => {
+  saveAttemptCalls += 1;
+
+  return {
+    attempt,
+    didSubmit: false,
+  };
+},
+  });
+
+  const result = await service.submit({
+    activityId: "activity-1",
+    attemptId: "attempt-1",
+    studentId: "student-1",
+    response,
+  });
+
+  assert.equal(result.state, "evaluated");
+  assert.equal(result.attempt.id, "attempt-1");
+  assert.equal(saveAttemptCalls, 0);
+});
+
+test("returns a completed attempt without saving again", async () => {
+  let saveAttemptCalls = 0;
+
+  const attempt = createAttempt({
+    completionState: "completed",
+  });
+
+  const service = new ActivitySubmissionService({
+    getActivity: async () => activity,
+    getAttempt: async () => attempt,
+    submitStartedAttempt: async () => {
+  saveAttemptCalls += 1;
+
+  return {
+    attempt,
+    didSubmit: false,
+  };
+},
+  });
+
+  const result = await service.submit({
+    activityId: "activity-1",
+    attemptId: "attempt-1",
+    studentId: "student-1",
+    response,
+  });
+
+  assert.equal(result.state, "completed");
+  assert.equal(result.attempt.id, "attempt-1");
+  assert.equal(saveAttemptCalls, 0);
+});
+
+  const result = await service.submit({
+    activityId: "activity-1",
+    attemptId: "attempt-1",
+    studentId: "student-1",
+    response: attempt.response!,
+  });
+
+  assert.equal(result.state, "submitted");
+  assert.equal(result.attempt.id, "attempt-1");
+  assert.equal(saveAttemptCalls, 0);
 });
 
 test("submits a started attempt", async () => {

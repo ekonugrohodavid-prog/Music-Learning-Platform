@@ -29,7 +29,20 @@ export type AttemptRepository<
   TCreateInput,
   TUpdateInput,
   TAttemptId extends RepositoryId = RepositoryId,
-> = Repository<TAttempt, TCreateInput, TUpdateInput, TAttemptId>;
+> = Repository<TAttempt, TCreateInput, TUpdateInput, TAttemptId> & {
+  submitStartedAttempt(
+    attemptId: TAttemptId,
+    studentId: UserId,
+    activityId: string,
+    input: {
+      submittedAt: string;
+      response: import("@/types").ActivityResponse;
+    },
+  ): Promise<{
+    attempt: TAttempt;
+    didSubmit: boolean;
+  }>;
+};
 
 export type CompositionRepository<
   TComposition,

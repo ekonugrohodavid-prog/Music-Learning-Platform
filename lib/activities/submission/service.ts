@@ -47,24 +47,28 @@ export class ActivitySubmissionService
     }
 
     if (attempt.completionState !== "started") {
-      throw new Error("Attempt has already been submitted");
-    }
+  return {
+    attempt,
+    state: attempt.completionState,
+  };
+}
 
     const submittedAt = new Date().toISOString();
 
-    const savedAttempt =
-      await this.dependencies.saveAttempt(
-        input.attemptId,
-        {
-          submittedAt,
-          response: input.response,
-          completionState: "submitted",
-        },
-      );
+    const submission =
+    await this.dependencies.submitStartedAttempt(
+    input.attemptId,
+    input.studentId,
+    input.activityId,
+    {
+      submittedAt,
+      response: input.response,
+    },
+  );
 
-    return {
-      attempt: savedAttempt,
-      state: "submitted" as AttemptState,
-    };
+return {
+  attempt: submission.attempt,
+  state: submission.attempt.completionState,
+};
   }
 }
