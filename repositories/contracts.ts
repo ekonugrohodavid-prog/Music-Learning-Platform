@@ -37,6 +37,8 @@ export type AttemptRepository<
     input: {
       submittedAt: string;
       response: import("@/types").ActivityResponse;
+      evaluation: import("@/types").EvaluationResult;
+      score: number;
     },
   ): Promise<{
     attempt: TAttempt;
@@ -113,3 +115,5 @@ export interface LearningContentRepository<
     competencyId: CompetencyId,
   ): Promise<readonly TEntity[]>;
 }
+
+

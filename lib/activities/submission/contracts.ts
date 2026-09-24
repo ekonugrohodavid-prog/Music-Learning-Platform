@@ -2,8 +2,10 @@ import type {
   ActivityAttempt,
   ActivityResponse,
   AttemptState,
+  EvaluationResult,
 } from "@/types";
 import type { Activity } from "@/types/learning";
+import type { ActivityDefinitionRegistry } from "../registry";
 
 export interface SubmitActivityInput {
   readonly activityId: string;
@@ -26,6 +28,8 @@ export interface ActivitySubmissionDependencies {
     attemptId: string,
   ) => Promise<ActivityAttempt | null>;
 
+  readonly activityDefinitionRegistry: ActivityDefinitionRegistry;
+
   readonly submitStartedAttempt: (
   attemptId: string,
   studentId: string,
@@ -33,7 +37,9 @@ export interface ActivitySubmissionDependencies {
   input: {
     submittedAt: string;
     response: ActivityResponse;
-  },
+      evaluation: EvaluationResult;
+      score: number;
+    },
 ) => Promise<{
   attempt: ActivityAttempt;
   didSubmit: boolean;
@@ -45,3 +51,5 @@ export interface ActivitySubmissionService {
     input: SubmitActivityInput,
   ): Promise<SubmitActivityResult>;
 }
+
+

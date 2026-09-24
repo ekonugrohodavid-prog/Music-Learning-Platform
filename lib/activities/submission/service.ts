@@ -47,28 +47,46 @@ export class ActivitySubmissionService
     }
 
     if (attempt.completionState !== "started") {
-  return {
-    attempt,
-    state: attempt.completionState,
-  };
-}
+      return {
+        attempt,
+        state: attempt.completionState,
+      };
+    }
+
+    const definition =
+      this.dependencies.activityDefinitionRegistry.get(
+        activity.type,
+      );
+
+    if (!definition?.evaluator) {
+      throw new Error(
+        `No evaluator configured for activity type: ${activity.type}`,
+      );
+    }
+
+    const evaluation = definition.evaluator.evaluate(
+      activity,
+      input.response,
+    );
 
     const submittedAt = new Date().toISOString();
 
     const submission =
-    await this.dependencies.submitStartedAttempt(
-    input.attemptId,
-    input.studentId,
-    input.activityId,
-    {
-      submittedAt,
-      response: input.response,
-    },
-  );
+      await this.dependencies.submitStartedAttempt(
+        input.attemptId,
+        input.studentId,
+        input.activityId,
+        {
+          submittedAt,
+          response: input.response,
+          evaluation,
+          score: evaluation.score.percentage,
+        },
+      );
 
-return {
-  attempt: submission.attempt,
-  state: submission.attempt.completionState,
-};
+    return {
+      attempt: submission.attempt,
+      state: submission.attempt.completionState,
+    };
   }
 }

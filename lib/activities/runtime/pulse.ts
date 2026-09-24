@@ -45,28 +45,31 @@ export function createPulseRuntime(
     createAudioScheduler();
 
   let running = false;
+  let startTimeMs: number | null = null;
   const taps: number[] = [];
 
   function start(): readonly MetronomeTick[] {
     scheduler.clear();
     taps.length = 0;
+    startTimeMs = now();
     running = true;
 
     return metronome.start(0);
   }
 
   function tap(timestampMs = now()): void {
-    if (!running) {
+    if (!running || startTimeMs === null) {
       return;
     }
 
-    taps.push(timestampMs);
+    taps.push(timestampMs - startTimeMs);
   }
 
   function stop(): readonly number[] {
     metronome.stop();
     scheduler.clear();
     running = false;
+    startTimeMs = null;
 
     return [...taps];
   }

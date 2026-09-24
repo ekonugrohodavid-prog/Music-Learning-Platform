@@ -9,6 +9,7 @@ import type {
 
 import type { ActivitySubmissionDependencies } from "./contracts";
 import { ActivitySubmissionService } from "./service.ts";
+import { createWave1ActivityDefinitionRegistry } from "../wave1-registry.ts";
 
 const activity = {
   id: "activity-1",
@@ -47,7 +48,7 @@ function createAttempt(
     attemptNumber: 1,
     createdAt: "2026-09-20T00:00:00.000Z",
     updatedAt: "2026-09-20T00:00:00.000Z",
-    ...overrides,
+  ...overrides,
   };
 }
 
@@ -59,6 +60,8 @@ function createDependencies(
   input: {
     submittedAt: string;
     response: ActivityResponse;
+    evaluation: NonNullable<ActivityAttempt["evaluation"]>;
+    score: number;
     completionState: "submitted";
   };
 }> = [];
@@ -67,6 +70,9 @@ const dependencies: ActivitySubmissionDependencies = {
   getActivity: async () => activity,
   getAttempt: async () => createAttempt(),
 
+  activityDefinitionRegistry:
+    overrides.activityDefinitionRegistry ??
+    createWave1ActivityDefinitionRegistry(),
   submitStartedAttempt: async (
     attemptId,
     _studentId,
@@ -85,12 +91,13 @@ const dependencies: ActivitySubmissionDependencies = {
       attempt: createAttempt({
         submittedAt: input.submittedAt,
         response: input.response,
+        evaluation: input.evaluation,
+        score: input.evaluation.score,
         completionState: "submitted",
       }),
       didSubmit: true,
     };
   },
-
   ...overrides,
 };
 
@@ -196,6 +203,7 @@ test("returns an already submitted attempt without saving again", async () => {
 
   const service = new ActivitySubmissionService({
     getActivity: async () => activity,
+    activityDefinitionRegistry: createWave1ActivityDefinitionRegistry(),
     getAttempt: async () => attempt,
     submitStartedAttempt: async () => {
   saveAttemptCalls += 1;
@@ -216,6 +224,7 @@ test("returns an already submitted attempt without saving again", async () => {
 
   const service = new ActivitySubmissionService({
     getActivity: async () => activity,
+    activityDefinitionRegistry: createWave1ActivityDefinitionRegistry(),
     getAttempt: async () => attempt,
     submitStartedAttempt: async () => {
   saveAttemptCalls += 1;
@@ -248,6 +257,7 @@ test("returns a completed attempt without saving again", async () => {
 
   const service = new ActivitySubmissionService({
     getActivity: async () => activity,
+    activityDefinitionRegistry: createWave1ActivityDefinitionRegistry(),
     getAttempt: async () => attempt,
     submitStartedAttempt: async () => {
   saveAttemptCalls += 1;
@@ -334,7 +344,17 @@ test("passes the student response to the repository", async () => {
   assert.deepEqual(savedAttempts[0].input.response, response);
 });
 
-test("does not perform evaluation or scoring", async () => {
+
+
+
+
+
+
+
+
+
+
+test("evaluates and persists the activity result", async () => {
   const { dependencies, savedAttempts } = createDependencies();
 
   const service = new ActivitySubmissionService(dependencies);
@@ -346,7 +366,9 @@ test("does not perform evaluation or scoring", async () => {
     response,
   });
 
-  assert.equal(savedAttempts[0].input.completionState, "submitted");
-  assert.equal(result.attempt.evaluation, undefined);
-  assert.equal(result.attempt.score, undefined);
+  assert.equal(savedAttempts.length, 1);
+  assert.deepEqual(savedAttempts[0].input.evaluation, result.attempt.evaluation);
+  assert.equal(savedAttempts[0].input.score, result.attempt.score?.percentage);
+  assert.ok(result.attempt.evaluation);
+  assert.ok(result.attempt.score);
 });

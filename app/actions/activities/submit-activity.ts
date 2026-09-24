@@ -7,6 +7,7 @@ import {
 import type { SubmitActivityInput, SubmitActivityResult } from "@/lib/activities/submission/action-contracts";
 import { createActivityDetailService } from "@/lib/activities/detail/container";
 import { SupabaseAttemptRepository } from "@/repositories/supabase/attempt";
+import { createWave1ActivityDefinitionRegistry } from "@/lib/activities/wave1-registry";
 import { activityResponseSchema } from "@/schemas/activity";
 
 export async function submitActivity(
@@ -26,6 +27,7 @@ if (!parsedInput.success) {
 
     const activityService = createActivityDetailService();
     const attemptRepository = new SupabaseAttemptRepository();
+    const activityDefinitionRegistry = createWave1ActivityDefinitionRegistry();
 
     const service = new ActivitySubmissionService({
       getActivity: (activityId) =>
@@ -33,6 +35,8 @@ if (!parsedInput.success) {
 
       getAttempt: (attemptId) =>
         attemptRepository.findById(attemptId),
+
+      activityDefinitionRegistry,
 
       submitStartedAttempt: (
   attemptId,
@@ -114,3 +118,5 @@ if (!parsedInput.success) {
     };
   }
 }
+
+

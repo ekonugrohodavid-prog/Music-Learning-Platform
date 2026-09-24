@@ -276,6 +276,8 @@ export class SupabaseAttemptRepository
     input: {
       submittedAt: string;
       response: ActivityResponse;
+      evaluation: EvaluationResult;
+      score: number;
     },
   ): Promise<{
     attempt: ActivityAttempt;
@@ -288,6 +290,8 @@ export class SupabaseAttemptRepository
       .update({
         submitted_at: input.submittedAt,
         response: input.response,
+        evaluation: input.evaluation,
+        score: input.score,
         completion_state: "submitted",
       })
       .eq("id", attemptId)
@@ -430,3 +434,5 @@ export class SupabaseAttemptRepository
     };
   }
 }
+
+

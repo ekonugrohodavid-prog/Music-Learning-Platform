@@ -33,7 +33,7 @@ test("ACT-003 initializes existing metronome engine", () => {
   assert.equal(ticks[1]?.timeMs, 1000);
 });
 
-test("ACT-003 captures taps only after start", () => {
+test("ACT-003 captures relative taps only after start", () => {
   let now = 500;
 
   const runtime = createPulseRuntime(
@@ -57,17 +57,21 @@ test("ACT-003 captures taps only after start", () => {
 
   assert.deepEqual(
     runtime.getTaps(),
-    [500, 1500],
+    [0, 1000],
   );
 });
 
-test("ACT-003 returns captured taps on stop", () => {
+test("ACT-003 returns captured relative taps on stop", () => {
+  let now = 250;
+
   const runtime = createPulseRuntime(
     activity,
-    () => 250,
+    () => now,
   );
 
   runtime.start();
+
+  now = 500;
   runtime.tap();
 
   assert.deepEqual(
@@ -76,7 +80,7 @@ test("ACT-003 returns captured taps on stop", () => {
   );
 });
 
-test("ACT-003 resets captured taps when started again", () => {
+test("ACT-003 resets captured taps and start time when started again", () => {
   let now = 500;
 
   const runtime = createPulseRuntime(
@@ -85,11 +89,13 @@ test("ACT-003 resets captured taps when started again", () => {
   );
 
   runtime.start();
+
+  now = 750;
   runtime.tap();
 
   assert.deepEqual(
     runtime.getTaps(),
-    [500],
+    [250],
   );
 
   runtime.stop();
@@ -98,8 +104,11 @@ test("ACT-003 resets captured taps when started again", () => {
 
   runtime.start();
 
+  now = 1250;
+  runtime.tap();
+
   assert.deepEqual(
     runtime.getTaps(),
-    [],
+    [250],
   );
 });
