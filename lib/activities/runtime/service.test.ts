@@ -65,9 +65,7 @@ test("ACT-003 captures response for ACT-004", () => {
 
   const response = {
     type: "pulse" as const,
-    response: JSON.stringify({
-      tapsMs: [100, 1100],
-    }),
+    tapsMs: [100, 1100],
   };
 
   const state = runtime.captureResponse(response);

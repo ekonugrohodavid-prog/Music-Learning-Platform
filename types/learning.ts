@@ -145,7 +145,7 @@ export interface ActivityAttempt {
 
 export interface PulseActivityResponse {
   type: "pulse";
-  response: string;
+  tapsMs: readonly number[];
 }
 
 export interface TempoActivityResponse {

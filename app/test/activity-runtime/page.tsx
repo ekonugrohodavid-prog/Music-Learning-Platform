@@ -90,7 +90,7 @@ export default function ActivityRuntimeTestPage() {
 
     const nextResponse: PulseActivityResponse = {
       type: "pulse",
-      response: JSON.stringify({ tapsMs }),
+      tapsMs,
     };
 
     runtime.captureResponse(nextResponse);

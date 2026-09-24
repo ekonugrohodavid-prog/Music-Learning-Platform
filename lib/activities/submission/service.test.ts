@@ -29,7 +29,7 @@ const activity = {
 
 const response: ActivityResponse = {
   type: "pulse",
-  response: "beat",
+  tapsMs: [100, 1100],
 };
 
 function createAttempt(
@@ -186,7 +186,7 @@ test("returns an already submitted attempt without saving again", async () => {
     submittedAt: "2026-01-01T00:01:00.000Z",
     response: {
       type: "pulse",
-      response: "tap",
+      tapsMs: [100],
     },
     completionState: "submitted",
     attemptNumber: 1,

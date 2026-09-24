@@ -71,9 +71,7 @@ export function ActivityRuntimeClient({
 
     const response: PulseActivityResponse = {
       type: "pulse",
-      response: JSON.stringify({
-        tapsMs: pulseRuntime.stop(),
-      }),
+      tapsMs: pulseRuntime.stop(),
     };
 
     runtime.captureResponse(response);

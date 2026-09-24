@@ -133,7 +133,7 @@ export type ActivityConfiguration = z.infer<
 
 export const pulseActivityResponseSchema = z.object({
   type: z.literal("pulse"),
-  response: z.string().min(1),
+  tapsMs: z.array(z.number()),
 });
 
 export const tempoActivityResponseSchema = z.object({
